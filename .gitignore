@@ -1,0 +1,36 @@
+# Virtual environment directory
+venv/
+.env
+
+# Byte-compiled files
+*.py[cod]
+__pycache__/
+
+# Logs & outputs
+*.log
+*.bak
+*.tmp
+*.png
+
+# IDE/editor stuff
+.vscode/
+.idea/
+
+# App data
+assets/messaged.csv
+
+# Python distribution files
+*.egg-info/
+dist/
+build/
+*.tar.gz
+*.whl
+
+# Config files (if sensitive, such as database credentials, keys)
+config.json
+
+# MacOS specific files
+.DS_Store
+
+# Windows specific files
+Thumbs.db
