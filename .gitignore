@@ -10,7 +10,6 @@ __pycache__/
 *.log
 *.bak
 *.tmp
-*.png
 
 # IDE/editor stuff
 .vscode/
