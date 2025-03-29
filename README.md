@@ -1,6 +1,6 @@
 # TikTok Auto Messaging Bot 💬
 
-This bot automatically sends human-like, casual messages to your TikTok contacts using your logged-in **Brave browser profile**.
+This bot automatically sends human-like, casual messages to your TikTok contacts using your logged-in **Brave**, **Chrome**, or **Edge** browser profile.
 
 Designed to simulate real user behavior — random delays, varied message formats, and skips users already messaged recently.
 
@@ -8,11 +8,13 @@ Designed to simulate real user behavior — random delays, varied message format
 
 ## ✅ Features
 
-- Uses your logged-in **Brave Profile 1**
+- Uses your logged-in **Profile 1** (Brave, Chrome, or Edge)
 - Skips users messaged in the last **12 hours**
 - Auto-generates **human-like streak messages**
 - Fully **GUI-based** — no terminal required
-- Written in clean, modular Python (easy to maintain)
+- Clean, modular Python architecture
+- Remembers your browser choice for next run
+- Edge WebDriver install prompt if not found
 
 ---
 
@@ -29,11 +31,16 @@ Designed to simulate real user behavior — random delays, varied message format
 - [ ] Build .exe version for standalone use
 - [ ] Auto-update DOM selectors when TikTok layout changes
 
+---
+
 ## 🛠 Requirements
 
 - Python 3.10 or higher
 - [undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
-- Brave browser with TikTok already logged in (Profile 1)
+- One of the following browsers installed with TikTok already logged in (Profile 1):
+  - Brave
+  - Chrome
+  - Microsoft Edge
 
 Install dependencies:
 
@@ -49,7 +56,13 @@ pip install undetected-chromedriver selenium
 python main.py
 ```
 
-Make sure Brave is **completely closed** before running the bot.
+Make sure your selected browser is **completely closed** before running the bot.
+
+If using **Edge**, ensure `msedgedriver.exe` is placed at:
+
+```
+C:\Program Files (x86)\Microsoft\Edge\Application\msedgedriver.exe
+```
 
 ---
 
@@ -59,7 +72,7 @@ Make sure Brave is **completely closed** before running the bot.
 tiktok-bot/
 ├── main.py
 ├── core/
-│   ├── browser.py         # Launches Brave using Profile 1
+│   ├── browser.py         # Launches Brave, Chrome, or Edge using selected profile
 │   ├── messenger.py       # Core logic: who to message and when
 │   ├── message_gen.py     # Generates natural random messages
 │   ├── user_tracker.py    # Tracks last message timestamp per user
@@ -67,6 +80,7 @@ tiktok-bot/
 ├── assets/
 │   └── messaged.csv       # Log of messaged users + timestamp
 ├── .gitignore
+└── config.json            # Stores browser choice for future use
 ```
 
 ---
@@ -75,3 +89,4 @@ tiktok-bot/
 
 - This bot simulates real behavior but still **automates interaction**. Use responsibly.
 - TikTok’s layout may change — inspect HTML and update selectors if needed.
+- If using Edge, ensure **msedgedriver.exe** is installed and placed in the correct directory.
