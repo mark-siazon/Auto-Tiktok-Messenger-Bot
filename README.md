@@ -1,5 +1,9 @@
 # TikTok Auto Messaging Bot 💬
 
+  <p align="center">
+    <img src="assets/github-banner.png" alt="TikTok Bot Banner" width="60%">
+  </p>
+
 This bot automatically sends human-like, casual messages to your TikTok contacts using your logged-in **Brave**, **Chrome**, or **Edge** browser profile.
 
 Designed to simulate real user behavior — random delays, varied message formats, and skips users already messaged recently.
@@ -35,9 +39,9 @@ Designed to simulate real user behavior — random delays, varied message format
 
 ## 🛠 Requirements
 
-- Python 3.10 or higher
+- Python 3.10 (Higher version causes errors)
 - [undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
-- One of the following browsers installed with TikTok already logged in (Profile 1):
+- One of the following browsers installed with TikTok already logged in (**Profile 1**):
   - Brave
   - Chrome
   - Microsoft Edge
