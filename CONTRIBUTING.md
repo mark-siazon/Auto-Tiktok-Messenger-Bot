@@ -13,6 +13,8 @@ python -m pytest
 
 Close the detected browser before `python main.py`.
 
+This project is licensed under the MIT License. See `LICENSE.md`.
+
 ## Pull requests
 
 - Branch from `main`
