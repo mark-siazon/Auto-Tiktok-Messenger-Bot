@@ -4,93 +4,69 @@
     <img src="assets/github-banner.png" alt="TikTok Bot Banner" width="60%">
   </p>
 
-This bot automatically sends human-like, casual messages to your TikTok contacts using your logged-in **Brave**, **Chrome**, or **Edge** browser profile.
-
-Designed to simulate real user behavior — random delays, varied message formats, and skips users already messaged recently.
+This bot sends short messages to your TikTok chats from the Brave, Chrome, or Edge profile already logged in on this Windows PC.
 
 ---
 
-## ✅ Features
+## Features
 
-- Uses your logged-in **Profile 1** (Brave, Chrome, or Edge)
-- Skips users messaged in the last **12 hours**
-- Auto-generates **human-like streak messages**
-- Fully **GUI-based** — no terminal required
-- Clean, modular Python architecture
-- Remembers your browser choice for next run
-- Edge WebDriver install prompt if not found
-
----
-
-### 🚧 Planned / Optional Improvements
-
-- [ ] Auto-detect unread users only
-- [ ] Limit daily message count (e.g. max 10 per run)
-- [ ] GUI log viewer (table of who was messaged & when)
-- [ ] Export logs to Excel/CSV
-- [ ] Support multiple TikTok accounts (profile switcher in GUI)
-- [ ] Add profile picker (select Brave/Chrome/Edge + user data folder)
-- [ ] Add cross-browser support (Brave, Chrome, Edge)
-- [ ] Clipboard-paste workaround for emoji support (ChromeDriver BMP fix)
-- [ ] Build .exe version for standalone use
-- [ ] Auto-update DOM selectors when TikTok layout changes
+- Finds Brave, Chrome, or Edge from Windows, including a PC that only has the `Default` profile
+- Uses the profile that already has a TikTok login
+- Skips chats messaged in the last 12 hours
+- Sends at most 10 chats per run, with a pause between them
+- Stops when TikTok shows a login or verification page
+- `python main.py --once` sends a single message
 
 ---
 
-## 🛠 Requirements
+## Requirements
 
-- Python 3.10 (Higher version causes errors)
-- [undetected-chromedriver](https://github.com/ultrafunkamsterdam/undetected-chromedriver)
-- One of the following browsers installed with TikTok already logged in (**Profile 1**):
-  - Brave
-  - Chrome
-  - Microsoft Edge
-
-Install dependencies:
+- Windows
+- Python 3.14
+- Brave, Chrome, or Edge, with TikTok logged in
 
 ```bash
-pip install undetected-chromedriver selenium
+pip install -r requirements.txt
 ```
 
 ---
 
-## 🚀 How to Run
+## How to Run
+
+Close the detected browser if it is already open, then:
 
 ```bash
 python main.py
 ```
 
-Make sure your selected browser is **completely closed** before running the bot.
+The window shows the browser and profile it found. Start messaging from there.
 
-If using **Edge**, ensure `msedgedriver.exe` is placed at:
-
-```
-C:\Program Files (x86)\Microsoft\Edge\Application\msedgedriver.exe
+```bash
+python -m pytest
+python main.py --once
 ```
 
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
-tiktok-bot/
+Auto-Tiktok-Messenger-Bot/
 ├── main.py
 ├── core/
-│   ├── browser.py         # Launches Brave, Chrome, or Edge using selected profile
-│   ├── messenger.py       # Core logic: who to message and when
-│   ├── message_gen.py     # Generates natural random messages
-│   ├── user_tracker.py    # Tracks last message timestamp per user
-│   └── utils.py           # Typing delays and human-like behavior
-├── assets/
-│   └── messaged.csv       # Log of messaged users + timestamp
-├── .gitignore
-└── config.json            # Stores browser choice for future use
+│   ├── detect.py
+│   ├── browser.py
+│   ├── messenger.py
+│   ├── message_gen.py
+│   ├── user_tracker.py
+│   └── utils.py
+├── tests/
+└── assets/messaged.csv
 ```
 
 ---
 
-## ⚠️ Warnings
+## Warnings
 
-- This bot simulates real behavior but still **automates interaction**. Use responsibly.
-- TikTok’s layout may change — inspect HTML and update selectors if needed.
-- If using Edge, ensure **msedgedriver.exe** is installed and placed in the correct directory.
+- This automates your own TikTok messages. A run stops at 10 sends, and it stops if TikTok asks you to log in or verify.
+- If the message page layout changes, the chat list hook has to be updated.

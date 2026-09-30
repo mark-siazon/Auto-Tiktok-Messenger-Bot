@@ -1,5 +1,6 @@
 # Virtual environment directory
 venv/
+.venv/
 .env
 
 # Byte-compiled files
@@ -17,6 +18,9 @@ __pycache__/
 
 # App data
 assets/messaged.csv
+missing_hook.png
+challenge.png
+critical_error.png
 
 # Python distribution files
 *.egg-info/
