@@ -39,6 +39,16 @@ All notable changes to this project will be documented here.
 
 ---
 
+## [1.2.0] - 2026-09-30
+
+### Changed
+
+- Detects Brave, Chrome, or Edge on Windows, including a PC that only has the Default profile
+- Sends at most 10 chats per run and stops on a TikTok login or verification page
+- Drops the hardcoded profile path and the manual Edge driver install
+
+---
+
 ## [Planned]
 
 - Auto-detect unread users only

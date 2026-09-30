@@ -1,96 +1,90 @@
+import argparse
+import threading
 import tkinter as tk
 from tkinter import messagebox
-import threading
-import json
-import os
-from core.messenger import start_bot
 
-# Load the current config (browser choice + remember me setting)
-def load_config():
+from core.detect import detect_target
+from core.messenger import StopRun, start_bot
+
+
+def launch_gui(once=False):
     try:
-        with open("config.json", "r") as file:
-            return json.load(file)
-    except FileNotFoundError:
-        return {"browser_choice": "Brave", "remember_choice": False}
+        target = detect_target()
+    except RuntimeError as exc:
+        root = tk.Tk()
+        root.withdraw()
+        messagebox.showerror("TikTok Auto Messenger", str(exc))
+        root.destroy()
+        return
 
-# Save the user config (browser choice + remember me setting)
-def save_config(browser_choice, remember_choice):
-    config = {"browser_choice": browser_choice, "remember_choice": remember_choice}
-    with open("config.json", "w") as file:
-        json.dump(config, file, indent=4)
-
-# Check if the browser is installed at the specified location
-def check_browser_installed(browser_choice):
-    browser_paths = {
-        "Brave": "C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe",
-        "Chrome": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
-        "Edge": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe"
-    }
-
-    return os.path.exists(browser_paths.get(browser_choice, ""))
-
-# GUI for browser choice
-def browser_choice_gui():
-    config = load_config()
-
-    # Create the main window
     root = tk.Tk()
-    root.title("Tiktok Auto Messenger | Select Browser")
-    root.geometry("400x300")
-    root.resizable(True, True)  # Make the window resizable
-    
-    # Label
-    label = tk.Label(root, text="Select the browser you are using:", font=("Arial", 12))
-    label.pack(pady=10, padx=20)
+    root.title("TikTok Auto Messenger")
+    root.geometry("460x240")
 
-    # Radio buttons for browser choice
-    browser_var = tk.StringVar(value=config["browser_choice"])
-    browsers = ["Brave", "Chrome", "Edge"]
-    for browser in browsers:
-        tk.Radiobutton(root, text=browser, variable=browser_var, value=browser, font=("Arial", 10)).pack()
+    if target is None:
+        tk.Label(
+            root,
+            text="No Brave, Chrome, or Edge profile was found on this PC.",
+            font=("Arial", 11),
+            wraplength=420,
+        ).pack(pady=24, padx=16)
+        root.mainloop()
+        return
 
-    # Remember me checkbox
-    remember_var = tk.BooleanVar(value=config["remember_choice"])
-    remember_checkbox = tk.Checkbutton(root, text="Remember my choice", variable=remember_var, font=("Arial", 10))
-    remember_checkbox.pack(pady=5)
+    tk.Label(root, text="Detected browser", font=("Arial", 11)).pack(pady=(16, 4))
+    tk.Label(root, text=target.message, font=("Arial", 13)).pack()
+    if not target.tiktok_login_found:
+        tk.Label(
+            root,
+            text="TikTok login was not found in that profile.",
+            font=("Arial", 10),
+        ).pack(pady=4)
 
-    # Status label
-    status_label = tk.Label(root, text="", font=("Arial", 11))
-    status_label.pack(pady=10)
+    status = tk.Label(root, text="", font=("Arial", 10), wraplength=420)
+    status.pack(pady=8)
 
-    # Start button for the bot
-    def start_bot_with_choice():
-        # Save the user's choice before starting the bot
-        save_config(browser_var.get(), remember_var.get())
+    button_text = "Send one message" if once else "Start messaging"
+    outcome = {"error": None, "summary": None}
 
-        # Check if the selected browser is installed
-        if not check_browser_installed(browser_var.get()):
-            messagebox.showerror("Error", f"{browser_var.get()} browser not found at the specified location.")
+    def post_status(text):
+        root.after(0, lambda value=text: status.config(text=value))
+
+    def finish():
+        button.config(state=tk.NORMAL, text=button_text)
+        if outcome["error"] is not None:
+            status.config(text=str(outcome["error"]))
+            messagebox.showerror("Stopped", str(outcome["error"]))
             return
+        summary = outcome["summary"] or "Finished."
+        status.config(text=summary)
+        messagebox.showinfo("Done", summary)
 
-        # Disable the button and make a status message
-        start_button.config(state=tk.DISABLED, text="Bot is Running...")
-        status_label.config(text="Bot is starting... Please wait.")
+    def worker():
+        try:
+            outcome["summary"] = start_bot(once=once, on_status=post_status)
+        except StopRun as exc:
+            outcome["error"] = exc
+        except Exception as exc:
+            outcome["error"] = exc
+        finally:
+            root.after(0, finish)
 
-        # Start the bot in a new thread
-        threading.Thread(target=start_bot, daemon=True).start()
+    def begin():
+        button.config(state=tk.DISABLED, text="Running...")
+        status.config(text="Starting.")
+        threading.Thread(target=worker, daemon=True).start()
 
-        # Keep the window open until the bot finishes
-        root.after(1000, check_bot_running)
-
-    def check_bot_running():
-        # If bot is running, don't close the window
-        if threading.active_count() > 1:
-            root.after(1000, check_bot_running)
-        else:
-            status_label.config(text="Bot finished. You can close the window.")
-            start_button.config(state=tk.NORMAL, text="Start Messaging")
-
-    start_button = tk.Button(root, text="Start Messaging", font=("Arial", 12), command=start_bot_with_choice)
-    start_button.pack(pady=20)
-
+    button = tk.Button(root, text=button_text, font=("Arial", 12), command=begin)
+    button.pack(pady=12)
     root.mainloop()
 
-# Entry point
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--once", action="store_true")
+    args = parser.parse_args()
+    launch_gui(once=args.once)
+
+
 if __name__ == "__main__":
-    browser_choice_gui()
+    main()

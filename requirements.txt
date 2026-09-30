@@ -1,2 +1,2 @@
-undetected-chromedriver
-selenium
+selenium==4.49.0
+pytest==9.1.1
