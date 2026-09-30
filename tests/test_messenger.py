@@ -57,7 +57,7 @@ def test_missing_chat_list_stops_once(tmp_path, monkeypatch):
     browser = Browser([])
 
     with pytest.raises(StopRun, match="Chat list"):
-        run_messages(browser, settle=noop, pause=noop)
+        run_messages(browser, settle=noop, pause=noop, chat_timeout=0)
 
     assert browser.clicks == []
     assert browser.screenshots == ["missing_hook.png"]
@@ -72,6 +72,48 @@ def test_verification_page_stops_before_send(tmp_path, monkeypatch):
 
     assert browser.clicks == []
     assert browser.screenshots == ["challenge.png"]
+
+
+class SuiteBrowser(Browser):
+    def __init__(self, names):
+        super().__init__(names)
+        self.frame_names = list(names)
+        self.in_frame = False
+        self.switch_to = self
+
+    def default_content(self):
+        self.in_frame = False
+
+    def frame(self, _frame):
+        self.in_frame = True
+
+    def find_elements(self, by, selector):
+        if selector == "iframe" and not self.in_frame:
+            return ["message-frame"]
+        if not self.in_frame and (
+            "dm-new-conversation-item" in selector or "chat-list-item" in selector
+        ):
+            return []
+        if self.in_frame and "dm-new-conversation-item" in selector:
+            return [Element(name, self) for name in self.frame_names]
+        return super().find_elements(by, selector)
+
+
+def test_business_suite_uses_the_message_frame(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    browser = SuiteBrowser(["ada"])
+
+    summary = run_messages(
+        browser,
+        once=True,
+        settle=noop,
+        pause=noop,
+        type_text=lambda element, text: element.send_keys(text),
+    )
+
+    assert browser.in_frame is True
+    assert "ada" in browser.clicks
+    assert summary == "Sent 1 message."
 
 
 def test_normal_run_stops_at_ten_sends(tmp_path, monkeypatch):

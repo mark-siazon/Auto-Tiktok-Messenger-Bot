@@ -11,6 +11,7 @@ This bot sends short messages to your TikTok chats from the Brave, Chrome, or Ed
 ## Features
 
 - Finds Brave, Chrome, or Edge from Windows, including a PC that only has the `Default` profile
+- Works on the regular Messages page and on Business Suite, where the chat list is inside a frame
 - Uses the profile that already has a TikTok login
 - Skips chats messaged in the last 12 hours
 - Sends at most 10 chats per run, with a pause between them

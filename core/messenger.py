@@ -1,3 +1,5 @@
+import time
+
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
@@ -8,17 +10,19 @@ from core.utils import human_delay, type_like_human
 
 MESSAGES_URL = "https://www.tiktok.com/messages"
 MAX_SENDS = 10
-CHAT_LIST_SELECTORS = ("[data-e2e='chat-list-item']",)
+CHAT_LIST_SELECTORS = (
+    "[data-e2e='dm-new-conversation-item']",
+    "[data-e2e='chat-list-item']",
+)
 NAME_SELECTORS = (
+    "[data-e2e='dm-new-chat-nickname']",
     "[data-e2e='chat-nickname']",
-    "[data-e2e='chat-title']",
-    "[data-e2e='dm-title']",
 )
 COMPOSER_SELECTORS = (
-    "[data-e2e='message-input'] div[contenteditable='true']",
-    "[data-e2e='message-input']",
+    "[data-e2e='dm-new-input-editor'] div[contenteditable='true']",
+    "[data-e2e='message-input-area'] div[contenteditable='true']",
+    "div.public-DraftEditor-content",
     "div.public-DraftStyleDefault-block",
-    "div[contenteditable='true']",
 )
 CHALLENGE_MARKERS = (
     "verify to continue",
@@ -33,11 +37,23 @@ class StopRun(Exception):
     pass
 
 
+def visible_text(browser):
+    script = getattr(browser, "execute_script", None)
+    if callable(script):
+        try:
+            text = script("return document.body ? document.body.innerText : ''")
+        except Exception:
+            text = None
+        if text:
+            return text
+    return getattr(browser, "page_source", "") or ""
+
+
 def challenge_reason(browser):
     url = (getattr(browser, "current_url", "") or "").lower()
     if "/login" in url:
         return "TikTok is asking you to log in."
-    source = (getattr(browser, "page_source", "") or "").lower()
+    source = visible_text(browser).lower()
     for marker in CHALLENGE_MARKERS:
         if marker in source:
             return "TikTok is asking for verification."
@@ -60,12 +76,56 @@ def _one(browser, selectors):
     return None
 
 
+def _chat_rows_anywhere(browser):
+    switch = getattr(browser, "switch_to", None)
+    if switch is not None:
+        try:
+            switch.default_content()
+        except Exception:
+            pass
+    rows = _chat_rows(browser)
+    if rows:
+        return rows
+    if switch is None:
+        return []
+    try:
+        frames = browser.find_elements(By.CSS_SELECTOR, "iframe")
+    except Exception:
+        return []
+    for frame in frames:
+        try:
+            switch.default_content()
+            switch.frame(frame)
+        except Exception:
+            continue
+        rows = _chat_rows(browser)
+        if rows:
+            return rows
+    try:
+        switch.default_content()
+    except Exception:
+        pass
+    return []
+
+
+def wait_for_chats(browser, timeout):
+    deadline = time.monotonic() + timeout
+    while True:
+        reason = challenge_reason(browser)
+        if reason:
+            return [], reason
+        rows = _chat_rows_anywhere(browser)
+        if rows or time.monotonic() >= deadline:
+            return rows, None
+        time.sleep(0.5)
+
+
 def _stop(browser, message, screenshot):
     browser.save_screenshot(screenshot)
     raise StopRun(message)
 
 
-def run_messages(browser, *, once=False, pause=None, settle=None, type_text=None, on_status=None):
+def run_messages(browser, *, once=False, pause=None, settle=None, type_text=None, on_status=None, chat_timeout=20):
     def report(message):
         if on_status:
             on_status(message)
@@ -79,11 +139,9 @@ def run_messages(browser, *, once=False, pause=None, settle=None, type_text=None
     browser.get(MESSAGES_URL)
     settle()
 
-    reason = challenge_reason(browser)
+    chats, reason = wait_for_chats(browser, chat_timeout)
     if reason:
         _stop(browser, reason, "challenge.png")
-
-    chats = _chat_rows(browser)
     if not chats:
         _stop(browser, "Chat list was not found.", "missing_hook.png")
 
