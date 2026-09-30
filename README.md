@@ -8,31 +8,48 @@
   Sends a short message to your own TikTok chats from the Brave, Chrome, or Edge profile already logged in on this Windows PC.
 </p>
 
-## What it does
+## Features
 
-Close that browser, then start the app. It finds the installed browser and the profile that already has TikTok. A PC with only `Default` uses that profile. Extra profiles are used only when those folders exist.
-
-The run opens `https://www.tiktok.com/messages`. Some accounts stay on that page. Others are sent to Business Suite, where the chat list is inside a frame. The bot reads the list in either place.
-
-Each run:
-
-- Skips a chat that was messaged in the last 12 hours
-- Sends at most 10 chats, then stops
+- Finds Brave, Chrome, or Edge from the Windows registry and the usual install folders
+- Uses `%LOCALAPPDATA%` for the signed-in Windows user, so the path is not fixed to one account
+- Uses the `Default` profile when that is the only profile on the PC
+- When extra profiles exist, uses the one that already has TikTok
+- When several profiles have TikTok, uses the one Windows marks as most recently used
+- Shows the detected browser and profile in the window before you start
+- Opens `https://www.tiktok.com/messages`
+- Reads the chat list on the regular Messages page
+- Reads the chat list inside the Business Suite frame when TikTok redirects there
+- Types a short varied message with a delay between characters
+- Skips a chat messaged in the last 12 hours
+- Sends at most 10 chats in one run, then stops
 - Waits 20 to 45 seconds between sends
-- Stops if TikTok asks you to log in or verify
+- Keeps the browser window visible
+- Stops if TikTok asks you to log in or verify, and does not retry
+- Asks you to close the browser when that profile is already open
+- Saves each chat name and time in `assets/messaged.csv`
+- `python main.py --once` sends to a single chat and stops
+- Selenium Manager fetches the browser driver, so Edge does not need a driver copied by hand
 
-The names and times are saved in `assets/messaged.csv`.
+## Requirements
 
-## Run
-
-Windows, Python 3.14, and Brave, Chrome, or Edge with TikTok already logged in.
+- Windows
+- Python 3.14
+- One of these browsers, with TikTok already logged in:
+  - Brave
+  - Chrome
+  - Microsoft Edge
 
 ```bash
 pip install -r requirements.txt
-python main.py
 ```
 
-The window shows the browser and profile it found. Start from there.
+## How to run
+
+Close the detected browser first, then:
+
+```bash
+python main.py
+```
 
 One chat only:
 
@@ -46,7 +63,7 @@ Tests, with no TikTok session:
 python -m pytest
 ```
 
-## Layout
+## Project structure
 
 ```
 Auto-Tiktok-Messenger-Bot/
@@ -62,6 +79,8 @@ Auto-Tiktok-Messenger-Bot/
 └── assets/messaged.csv
 ```
 
-## Before you rely on a run
+## Warnings
 
-A finished run means the message was typed and Enter was pressed. Open the chat in TikTok to confirm it is in the thread. If the message page layout changes, the chat-list hook in `core/messenger.py` has to be updated.
+- This automates your own TikTok messages
+- A finished run means the message was typed and Enter was pressed. Open the chat in TikTok to confirm it is in the thread
+- If the message page layout changes, the chat-list hook in `core/messenger.py` has to be updated
