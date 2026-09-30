@@ -79,6 +79,20 @@ Auto-Tiktok-Messenger-Bot/
 └── assets/messaged.csv
 ```
 
+## Future improvements
+
+- Message only unread chats
+- Show the send log in the window
+- Export the log to CSV from the window
+- Message templates with a name variable
+- A daily summary of who was messaged
+- Schedule a run for a set time of day
+- Resume a run after a crash
+- Pick a browser profile from the window when detection finds none
+- More than one TikTok account on the same PC
+- A standalone Windows app, so Python is not required
+- Update the chat-list hook when TikTok changes the page
+
 ## Warnings
 
 - This automates your own TikTok messages
