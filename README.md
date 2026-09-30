@@ -1,73 +1,67 @@
-# TikTok Auto Messaging Bot 💬
+<p align="center">
+  <img src="assets/github-banner.png" width="70%" alt="TikTok Auto Messaging Bot"/>
+</p>
 
-  <p align="center">
-    <img src="assets/github-banner.png" alt="TikTok Bot Banner" width="60%">
-  </p>
+<h1 align="center">TikTok Auto Messaging Bot</h1>
 
-This bot sends short messages to your TikTok chats from the Brave, Chrome, or Edge profile already logged in on this Windows PC.
+<p align="center">
+  Sends a short message to your own TikTok chats from the Brave, Chrome, or Edge profile already logged in on this Windows PC.
+</p>
 
----
+## What it does
 
-## Features
+Close that browser, then start the app. It finds the installed browser and the profile that already has TikTok. A PC with only `Default` uses that profile. Extra profiles are used only when those folders exist.
 
-- Finds Brave, Chrome, or Edge from Windows, including a PC that only has the `Default` profile
-- Works on the regular Messages page and on Business Suite, where the chat list is inside a frame
-- Uses the profile that already has a TikTok login
-- Skips chats messaged in the last 12 hours
-- Sends at most 10 chats per run, with a pause between them
-- Stops when TikTok shows a login or verification page
-- `python main.py --once` sends a single message
+The run opens `https://www.tiktok.com/messages`. Some accounts stay on that page. Others are sent to Business Suite, where the chat list is inside a frame. The bot reads the list in either place.
 
----
+Each run:
 
-## Requirements
+- Skips a chat that was messaged in the last 12 hours
+- Sends at most 10 chats, then stops
+- Waits 20 to 45 seconds between sends
+- Stops if TikTok asks you to log in or verify
 
-- Windows
-- Python 3.14
-- Brave, Chrome, or Edge, with TikTok logged in
+The names and times are saved in `assets/messaged.csv`.
+
+## Run
+
+Windows, Python 3.14, and Brave, Chrome, or Edge with TikTok already logged in.
 
 ```bash
 pip install -r requirements.txt
-```
-
----
-
-## How to Run
-
-Close the detected browser if it is already open, then:
-
-```bash
 python main.py
 ```
 
-The window shows the browser and profile it found. Start messaging from there.
+The window shows the browser and profile it found. Start from there.
+
+One chat only:
 
 ```bash
-python -m pytest
 python main.py --once
 ```
 
----
+Tests, with no TikTok session:
 
-## Project Structure
+```bash
+python -m pytest
+```
+
+## Layout
 
 ```
 Auto-Tiktok-Messenger-Bot/
-├── main.py
+├── main.py                 # Window
 ├── core/
-│   ├── detect.py
-│   ├── browser.py
-│   ├── messenger.py
-│   ├── message_gen.py
-│   ├── user_tracker.py
-│   └── utils.py
+│   ├── detect.py           # Windows browser and profile
+│   ├── browser.py          # Visible browser launch
+│   ├── messenger.py        # Regular inbox and Business Suite
+│   ├── message_gen.py      # Message text
+│   ├── user_tracker.py     # 12-hour log
+│   └── utils.py            # Typing delay
 ├── tests/
 └── assets/messaged.csv
 ```
 
----
+## Before you rely on a run
 
-## Warnings
-
-- This automates your own TikTok messages. A run stops at 10 sends, and it stops if TikTok asks you to log in or verify.
-- If the message page layout changes, the chat list hook has to be updated.
+A finished run means the message was typed and Enter was pressed. Open the chat in TikTok to confirm it is in the thread. If the message page layout changes, the chat-list hook in `core/messenger.py` has to be updated.
